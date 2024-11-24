@@ -163,7 +163,7 @@ public class UserService {
     }
 
     private void sendResetPasswordEmail(String email, String token) throws Exception {
-        String resetLink = "http://localhost:4200/reset-password?token=" + token;
+        String resetLink = "https://orientacion-vocacional.vercel.app/reset-password?token=" + token;
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
 

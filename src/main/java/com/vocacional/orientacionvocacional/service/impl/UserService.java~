@@ -35,19 +35,25 @@ public class UserService {
     private FileStorageService fileStorageService; // Para almacenar los archivos
     @Autowired
     private StudentRepository studentRepository;
+    @Autowired
+    private JwtUtilService jwtUtilService;
 
 
-    public void updateStudentPlanToPremium(Integer userId) {
+    public String updateStudentPlanToPremium(Integer userId) {
         Optional<Student> studentOptional = studentRepository.findById(Long.valueOf(userId));
         if (studentOptional.isPresent()) {
             Student student = studentOptional.get();
             if (student.getPlan() != Plan.PREMIUM) {
                 student.setPlan(Plan.PREMIUM);
                 studentRepository.save(student);
+
+                // Después de actualizar el plan, generamos un nuevo token
+                return jwtUtilService.generateToken(student);  // Genera un token con la nueva información
             }
         } else {
             throw new IllegalArgumentException("No se encontró un estudiante con el ID: " + userId);
         }
+        return null; // Retornamos null si no hubo cambio en el plan
     }
 
     public User findById(Integer userId) {
