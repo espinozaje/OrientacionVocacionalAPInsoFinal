@@ -1,16 +1,14 @@
-package com.vocacional.orientacionvocacional.model;
-
-import com.vocacional.orientacionvocacional.model.entity.Pregunta;
+package com.vocacional.orientacionvocacional.model.entity;
 
 import java.util.List;
 public class VocationalTest {
-    private List<Pregunta> questions;
+    private List<Question> questions;
 
-    public List<Pregunta> getQuestions() {
+    public List<Question> getQuestions() {
         return questions;
     }
 
-    public void setQuestions(List<Pregunta> questions) {
+    public void setQuestions(List<Question> questions) {
         this.questions = questions;
     }
 }

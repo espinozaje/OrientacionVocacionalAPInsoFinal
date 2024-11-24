@@ -1,15 +1,20 @@
 package com.vocacional.orientacionvocacional.Controller;
-import com.vocacional.orientacionvocacional.model.Question;
-import com.vocacional.orientacionvocacional.model.VocationalTest;
-import com.vocacional.orientacionvocacional.model.entity.Pregunta;
-import com.vocacional.orientacionvocacional.repository.PreguntaRepository;
+import com.vocacional.orientacionvocacional.Mapper.QuestionMapper;
+import com.vocacional.orientacionvocacional.dto.QuestionDTO;
+import com.vocacional.orientacionvocacional.model.entity.*;
+import com.vocacional.orientacionvocacional.repository.QuestionRepository;
+import com.vocacional.orientacionvocacional.repository.TestResultRepository;
+import com.vocacional.orientacionvocacional.service.impl.AreaService;
+import com.vocacional.orientacionvocacional.service.impl.JwtUtilService;
+import com.vocacional.orientacionvocacional.service.impl.VocationalTestService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -17,43 +22,56 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:4200")
 public class VocationalController {
     @Autowired
-    private PreguntaRepository preguntaRepository;
+    private QuestionRepository questionRepository;
 
-    @PostMapping("/submit")
-    public ResponseEntity<ApiResponse> submitVocationalTest(@RequestBody VocationalTest test){
-        String result = calculateTestResult(test);
-        ApiResponse apiResponse = new ApiResponse(result);
-        return ResponseEntity.ok(apiResponse);
+    @Autowired
+    private AreaService areaService;
+
+    @Autowired
+    private VocationalTestService vocationalTestService;
+
+    @Autowired
+    private QuestionMapper questionMapper;
+
+    @Autowired
+    private TestResultRepository testResultRepository;
+
+    @Autowired
+    private JwtUtilService jwtUtilService;
+
+
+    @PostMapping("/submit-register")
+    public ResponseEntity<Map<String, Object>> submitVocationalTest(
+            @RequestBody VocationalTest test,
+            HttpServletRequest request) {
+
+        String token = request.getHeader("Authorization").substring(7);
+        Integer userId = jwtUtilService.extractUserId(token);
+
+        Map<String, Object> result = vocationalTestService.calculateTestResultRegister(test, userId);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/results/{userId}")
+    public ResponseEntity<List<Career>> getRecommendedCareers(@PathVariable Long userId) {
+        TestResult result = testResultRepository.findFirstByUserIdOrderByDateRealizationDesc(userId)
+                .orElseThrow(() -> new RuntimeException("No se encontraron resultados para el usuario"));
+
+        return ResponseEntity.ok(result.getRecommendedCareers());
     }
 
     @GetMapping("/questions")
-    public List<Pregunta> getQuestions(){
-        List<Pregunta> preguntas = preguntaRepository.findAll();
-        System.out.println("Preguntas enviadas: " + preguntas);
-        return preguntas;
+    public List<QuestionDTO> getQuestions(){
+        List<Question> questions = questionRepository.findAll();
+
+        return questions.stream()
+                .map(questionMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    private String calculateTestResult(VocationalTest test){
-        Map<String, Integer> areaScores = new HashMap<>();
-
-        for (Question question: test.getQuestions()){
-            if (question.getSelectedOption().getScore()==1){
-                String area = question.getArea();
-                areaScores.put(area, areaScores.getOrDefault(area, 0)+1);
-            }
-        }
-
-        String recommendedArea = "";
-        int maxScore = 0;
-
-        for (Map.Entry<String, Integer> entry : areaScores.entrySet()){
-            if(entry.getValue()>maxScore){
-                maxScore = entry.getValue();
-                recommendedArea = entry.getKey();
-            }
-        }
-
-        return "Area recomendada: "+ recommendedArea;
+    @GetMapping("/areas")
+    public List<Area> getAreas(){
+        return areaService.findAllArea();
     }
 }
 

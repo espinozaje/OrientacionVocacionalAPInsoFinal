@@ -4,20 +4,11 @@
 El objetivo de este proyecto es desarrollar una aplicación web que facilite la orientación
 vocacional para estudiantes de nivel secundario y universitario. La plataforma conectará a
 los estudiantes con expertos en diversas áreas profesionales, proporcionando
-herramientas para explorar diferentes carreras, evaluar habilidades e intereses, y recibir
+herramientas para explorar diferentes careers, evaluar habilidades e intereses, y recibir
 asesoramiento personalizado. Los estudiantes podrán crear perfiles, realizar pruebas de
 orientación vocacional, y acceder a recursos que los ayudarán a tomar decisiones
 informadas sobre su futuro académico y profesional.
 
-### Colaboradores del Proyecto
-
-| **Nombre**              | **Rol**                                     | **Perfil**                                                 |
-|-------------------------|---------------------------------------------|------------------------------------------------------------|
-| |  | [LinkedIn]()           |
-|    |                    |      [LinkedIn]()                                                         |
-| Espinoza Eche Jeisson   |                    |          [LinkedIn]()                                                     |
-|   |                    |             [LinkedIn]()                                                  |
-|    |                    |                 [LinkedIn]()                                                                |
 
 ### Revisa el Progreso del Proyecto
 
@@ -47,11 +38,11 @@ Mira cómo va avanzando nuestro trabajo visitando el siguiente enlace: [Jira](ht
     - Los estudiantes podrán realizar pruebas de
       orientación vocacional que evalúen sus habilidades, intereses y valores.
       Estas pruebas generarán informes que ayudarán a los estudiantes a
-      identificar posibles carreras y campos de estudio.
+      identificar posibles careers y campos de estudio.
 
 - **Resultados Personalizados:**
     - Los informes de las pruebas ofrecerán
-      recomendaciones de carreras y sugerencias de estudios adicionales
+      recomendaciones de careers y sugerencias de estudios adicionales
       basados en los resultados obtenidos.
 
 #### **Módulo de Conexión con Expertos:**
@@ -76,7 +67,7 @@ Mira cómo va avanzando nuestro trabajo visitando el siguiente enlace: [Jira](ht
 
 - **Acceso a contenido:**
     - Integración de artículos, videos, y otros recursos
-      educativos que proporcionen información sobre diferentes carreras,
+      educativos que proporcionen información sobre diferentes careers,
       habilidades necesarias, y tendencias del mercado laboral.
 - **Recomendacios Personalizadas:**
     - Ofrecimiento de contenido

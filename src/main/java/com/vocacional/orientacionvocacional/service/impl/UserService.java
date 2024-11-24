@@ -1,7 +1,13 @@
 package com.vocacional.orientacionvocacional.service.impl;
 
+
 import com.vocacional.orientacionvocacional.dto.UserDTO;
+import com.vocacional.orientacionvocacional.model.entity.Adviser;
+import com.vocacional.orientacionvocacional.model.entity.Student;
 import com.vocacional.orientacionvocacional.model.entity.User;
+import com.vocacional.orientacionvocacional.model.enums.ERole;
+import com.vocacional.orientacionvocacional.model.enums.Plan;
+import com.vocacional.orientacionvocacional.repository.StudentRepository;
 import com.vocacional.orientacionvocacional.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,81 +17,107 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class UserService {
 
     @Autowired
-    private UserRepository usuarioRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JavaMailSender mailSender;
-
-    public void registrarUsuario(UserDTO usuarioDTO) {
-
-        User user = new User();
-        user.setFirstName(usuarioDTO.getFirstName());
-        user.setLastName(usuarioDTO.getLastName());
-        user.setEmail(usuarioDTO.getEmail());
-        user.setPassword(usuarioDTO.getPassword());
+    @Autowired
+    private FileStorageService fileStorageService; // Para almacenar los archivos
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private JwtUtilService jwtUtilService;
 
 
-        user.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
+    public String updateStudentPlanToPremium(Integer userId) {
+        Optional<Student> studentOptional = studentRepository.findById(Long.valueOf(userId));
+        if (studentOptional.isPresent()) {
+            Student student = studentOptional.get();
+            if (student.getPlan() != Plan.PREMIUM) {
+                student.setPlan(Plan.PREMIUM);
+                studentRepository.save(student);
 
-
-        usuarioRepository.save(user);
-    }
-
-    public boolean login(String email, String password) {
-        User usuario = usuarioRepository.findByEmail(email);
-        if (usuario != null) {
-            return passwordEncoder.matches(password, usuario.getPassword());  // Compara contraseñas
+                // Después de actualizar el plan, generamos un nuevo token
+                return jwtUtilService.generateToken(student);  // Genera un token con la nueva información
+            }
+        } else {
+            throw new IllegalArgumentException("No se encontró un estudiante con el ID: " + userId);
         }
-        return false;
+        return null; // Retornamos null si no hubo cambio en el plan
     }
 
+    public User findById(Integer userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+    }
 
-    public void updateUser(Long id, UserDTO userDTO) throws Exception {
-        User user = usuarioRepository.findById(id)
-                .orElseThrow(() -> new Exception("Usuario no encontrado con id: " + id));
+    public void updateProfileImage(Integer userId, String newFilePath) {
+        User user = findById(userId);
+        user.setImg_profile(newFilePath);
+        userRepository.save(user);
+    }
+
+    public void registerUser(UserDTO userDTO) {
+        User user;
+        if (userDTO.getRole() == ERole.STUDENT) {
+            user = new Student();
+        } else if (userDTO.getRole() == ERole.ADVISER) {
+            user = new Adviser();
+        } else {
+            throw new IllegalArgumentException("Rol no válido");
+        }
 
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());
         user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setRole(userDTO.getRole());
 
-        if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        }
-
-        usuarioRepository.save(user);
+        userRepository.save(user);
     }
 
 
-    public void deleteUser(Long id) throws Exception {
-        User user = usuarioRepository.findById(id)
+
+
+    public User login(String email, String password) {
+        User user = userRepository.findByEmail(email);
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            return user;
+        }
+        return null;
+    }
+
+
+    public void deleteUser(Integer id) throws Exception {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new Exception("Usuario no encontrado con id: " + id));
 
-        usuarioRepository.delete(user);
+        userRepository.delete(user);
     }
 
 
-    public User getUserById(Long id) throws Exception {
-        return usuarioRepository.findById(id)
+    public User getUserById(Integer id) throws Exception {
+        return userRepository.findById(id)
                 .orElseThrow(() -> new Exception("Usuario no encontrado con id: " + id));
     }
 
 
     public List<User> getAllUsers() {
-        return usuarioRepository.findAll();
+        return userRepository.findAll();
     }
 
 
-    public void updateAndEncryptPassword(Long id, String newPassword) throws Exception {
-        User user = usuarioRepository.findById(id)
+    public void updateAndEncryptPassword(Integer id, String newPassword) throws Exception {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new Exception("Usuario no encontrado con id: " + id));
 
 
@@ -93,41 +125,45 @@ public class UserService {
         user.setPassword(encryptedPassword);
 
 
-        usuarioRepository.save(user);
+        userRepository.save(user);
     }
 
-
-    public User findByEmail(String email) {
-        return usuarioRepository.findByEmail(email);
-    }
 
     public void generateResetPasswordToken(String email) throws Exception {
-        User user = usuarioRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new Exception("No se encontró un usuario con ese correo.");
         }
 
         String token = UUID.randomUUID().toString();
         user.setResetPasswordToken(token);
-        usuarioRepository.save(user);
+        userRepository.save(user);
 
-        // Enviar correo electrónico con el token
+
         sendResetPasswordEmail(user.getEmail(), token);
     }
 
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
+
     public void resetPassword(String token, String newPassword) throws Exception {
-        User user = usuarioRepository.findByResetPasswordToken(token);
+        User user = userRepository.findByResetPasswordToken(token);
         if (user == null) {
             throw new Exception("Token inválido.");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetPasswordToken(null);
-        usuarioRepository.save(user);
+        userRepository.save(user);
     }
 
     private void sendResetPasswordEmail(String email, String token) throws Exception {
-        String resetLink = "https://orientacion-vocacional-inso.vercel.app/reset-password?token=" + token;
+        String resetLink = "http://localhost:4200/reset-password?token=" + token;
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
 
@@ -143,5 +179,4 @@ public class UserService {
 
         mailSender.send(message);
     }
-
 }

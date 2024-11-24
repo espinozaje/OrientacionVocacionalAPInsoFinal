@@ -1,0 +1,4 @@
+package com.vocacional.orientacionvocacional.dto;
+
+public class PaymentOrderResponse {
+}

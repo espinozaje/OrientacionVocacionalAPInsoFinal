@@ -1,0 +1,9 @@
+package com.vocacional.orientacionvocacional.dto;
+
+import lombok.Data;
+
+@Data
+public class PurchaseCreateDTO {
+    private Float total;
+    private Integer userId;
+}
