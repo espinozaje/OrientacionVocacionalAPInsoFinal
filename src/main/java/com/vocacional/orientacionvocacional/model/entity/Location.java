@@ -3,7 +3,7 @@ package com.vocacional.orientacionvocacional.model.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "ubicaciones")
+@Table(name = "ubicacion")
 public class Ubicacion {
 
     @Id

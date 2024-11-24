@@ -1,10 +1,10 @@
 package com.vocacional.orientacionvocacional.Controller;
 
-import com.vocacional.orientacionvocacional.model.entity.Carrera;
-import com.vocacional.orientacionvocacional.model.entity.Ubicacion;
+import com.vocacional.orientacionvocacional.model.entity.Career;
+import com.vocacional.orientacionvocacional.model.entity.Location;
 import com.vocacional.orientacionvocacional.repository.CarreraRepository;
 import com.vocacional.orientacionvocacional.repository.UbicacionRepository;
-import com.vocacional.orientacionvocacional.service.impl.CarreraService;
+import com.vocacional.orientacionvocacional.service.impl.CareerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import java.util.List;
 public class CarreraController {
 
     @Autowired
-    private CarreraService carreraService;
+    private CareerService careerService;
 
     @Autowired
     private CarreraRepository carreraRepository;
@@ -25,12 +25,12 @@ public class CarreraController {
     private UbicacionRepository ubicacionRepository;
 
     @GetMapping("/filtrarubicacionexacta")
-    public ResponseEntity<List<Carrera>> filtrarCarrerasPorUbicacion(
+    public ResponseEntity<List<Career>> filtrarCarrerasPorUbicacion(
             @RequestParam String ciudad,
             @RequestParam String region,
             @RequestParam String pais
     ) {
-        List<Carrera> carreras = carreraService.obtenerCarrerasPorUbicacion(ciudad, region, pais);
+        List<Career> carreras = careerService.obtenerCarrerasPorUbicacion(ciudad, region, pais);
         if (carreras != null && !carreras.isEmpty()) {
             return ResponseEntity.ok(carreras);
         } else {
@@ -40,58 +40,58 @@ public class CarreraController {
 
 
     @PostMapping("/insertarubi")
-    public ResponseEntity<Ubicacion> agregarUbicacion(@RequestBody Ubicacion ubicacion) {
-        Ubicacion nuevaUbicacion = ubicacionRepository.save(ubicacion);
+    public ResponseEntity<Location> agregarUbicacion(@RequestBody Location ubicacion) {
+        Location nuevaUbicacion = ubicacionRepository.save(ubicacion);
         return ResponseEntity.ok(nuevaUbicacion);
     }
 
 
     @PostMapping("/insertarcarrera")
-    public ResponseEntity<Carrera> agregarCarrera(@RequestParam String nombreCarrera, @RequestParam Long ubicacionId, @RequestParam String img, @RequestParam String descripcion, @RequestParam String precio) {
-        Ubicacion ubicacion = ubicacionRepository.findById(ubicacionId).orElse(null);
+    public ResponseEntity<Career> agregarCarrera(@RequestParam String nombreCarrera, @RequestParam Long ubicacionId, @RequestParam String img, @RequestParam String descripcion, @RequestParam String precio) {
+        Location ubicacion = ubicacionRepository.findById(ubicacionId).orElse(null);
         if (ubicacion == null) {
             return ResponseEntity.badRequest().body(null);
         }
 
-        Carrera carrera = new Carrera();
+        Career carrera = new Career();
         carrera.setNombre(nombreCarrera);
         carrera.setUbicacion(ubicacion);
         carrera.setImg(img);
         carrera.setDescripcion(descripcion);
         carrera.setPrecioMensualidad(precio);
 
-        Carrera nuevaCarrera = carreraRepository.save(carrera);
+        Career nuevaCarrera = carreraRepository.save(carrera);
         return ResponseEntity.ok(nuevaCarrera);
     }
 
     @GetMapping("/porubicacion/{ubicacionId}")
-    public ResponseEntity<List<Carrera>> obtenerCarrerasPorUbicacion(@PathVariable Long ubicacionId) {
-        Ubicacion ubicacion = ubicacionRepository.findById(ubicacionId).orElse(null);
+    public ResponseEntity<List<Career>> obtenerCarrerasPorUbicacion(@PathVariable Long ubicacionId) {
+        Location ubicacion = ubicacionRepository.findById(ubicacionId).orElse(null);
         if (ubicacion == null) {
             return ResponseEntity.badRequest().body(null); // Si no se encuentra la ubicación
         }
 
-        List<Carrera> carreras = carreraRepository.findByUbicacion(ubicacion);
+        List<Career> carreras = carreraRepository.findByUbicacion(ubicacion);
         return ResponseEntity.ok(carreras);
     }
 
 
     @GetMapping("/mostrarubicaciones")
-    public ResponseEntity<List<Ubicacion>> obtenerUbicaciones() {
-        List<Ubicacion> ubicaciones = ubicacionRepository.findAll();
+    public ResponseEntity<List<Location>> obtenerUbicaciones() {
+        List<Location> ubicaciones = ubicacionRepository.findAll();
         return ResponseEntity.ok(ubicaciones);
     }
 
     @GetMapping("/mostrarcarreras")
-    public ResponseEntity<List<Carrera>> obtenercarreras(){
-        List<Carrera> carreras = carreraRepository.findAll();
+    public ResponseEntity<List<Career>> obtenercarreras(){
+        List<Career> carreras = carreraRepository.findAll();
         return ResponseEntity.ok(carreras);
     }
 
     @GetMapping("/carreraporID/{carreraId}")
     public ResponseEntity<?> obtenerCarrerasPorID(@PathVariable Long carreraId) {
         try {
-            Carrera carrera = carreraService.getCarreraById(carreraId);
+            Career carrera = careerService.getCarreraById(carreraId);
             return ResponseEntity.ok(carrera);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al obtener el usuario: " + e.getMessage());

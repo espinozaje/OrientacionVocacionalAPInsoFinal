@@ -13,8 +13,8 @@ public class Opcion {
     private String texto;
     private int score;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pregunta_id")
+    @ManyToOne
+    @JoinColumn(name = "pregunta_id", nullable = false)
     @JsonBackReference
     private Pregunta pregunta;
 

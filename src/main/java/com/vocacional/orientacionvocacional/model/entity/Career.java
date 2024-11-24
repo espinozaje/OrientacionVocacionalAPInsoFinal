@@ -1,9 +1,10 @@
 package com.vocacional.orientacionvocacional.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "carreras")
+@Table(name = "carrera")
 public class Carrera {
 
     @Id
@@ -12,6 +13,11 @@ public class Carrera {
 
     private String nombre;
 
+
+    @ManyToOne
+    @JoinColumn(name = "area_id", nullable = false)
+    @JsonBackReference
+    private Area area;
     @ManyToOne
     @JoinColumn(name = "ubicacion_id", nullable = false)
     private Ubicacion ubicacion;
@@ -21,6 +27,15 @@ public class Carrera {
     private String img;
 
     // Getters y Setters
+
+    public Area getArea() {
+        return area;
+    }
+
+    public void setArea(Area area) {
+        this.area = area;
+    }
+
     public Long getId() {
         return id;
     }

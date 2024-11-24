@@ -1,7 +1,7 @@
 package com.vocacional.orientacionvocacional.service.impl;
 
-import com.vocacional.orientacionvocacional.model.entity.Carrera;
-import com.vocacional.orientacionvocacional.model.entity.Ubicacion;
+import com.vocacional.orientacionvocacional.model.entity.Career;
+import com.vocacional.orientacionvocacional.model.entity.Location;
 import com.vocacional.orientacionvocacional.repository.CarreraRepository;
 import com.vocacional.orientacionvocacional.repository.UbicacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,15 +18,15 @@ public class CarreraService {
     @Autowired
     private UbicacionRepository ubicacionRepository;
 
-    public List<Carrera> obtenerCarrerasPorUbicacion(String ciudad, String region, String pais) {
-        Ubicacion ubicacion = ubicacionRepository.findByCiudadAndRegionAndPais(ciudad, region, pais);
+    public List<Career> obtenerCarrerasPorUbicacion(String ciudad, String region, String pais) {
+        Location ubicacion = ubicacionRepository.findByCiudadAndRegionAndPais(ciudad, region, pais);
         if (ubicacion != null) {
             return carreraRepository.findByUbicacion(ubicacion);
         }
         return null;
     }
 
-    public Carrera getCarreraById(Long id) throws Exception {
+    public Career getCarreraById(Long id) throws Exception {
         return carreraRepository.findById(id)
                 .orElseThrow(() -> new Exception("Carrera no encontrada con id: " + id));
     }
