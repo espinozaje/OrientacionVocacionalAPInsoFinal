@@ -7,6 +7,7 @@ import com.vocacional.orientacionvocacional.repository.TestResultRepository;
 import com.vocacional.orientacionvocacional.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,53 +28,65 @@ public class VocationalTestService {
     private TestResultRepository testResultRepository;
 
 
-    public Map<String, Object> calculateTestResultRegister(VocationalTest test, Integer  userId) {
+    @Transactional
+    public Map<String, Object> calculateTestResultRegister(VocationalTest test, Integer userId) {
         Map<Long, Integer> areaScores = new HashMap<>();
-        List<Career> careers = new ArrayList<>();
+        int totalInterested = 0, totalNotInterested = 0;
 
         // Calcular puntuación por área
         for (Question question : test.getQuestions()) {
             Long areaId = question.getArea().getId();
-            if (question.getSelectedOption() != null && question.getSelectedOption().getScore() == 1) {
-                areaScores.put(areaId, areaScores.getOrDefault(areaId, 0) + 1);
+            if (question.getSelectedOption() != null) {
+                if (question.getSelectedOption().getScore() == 1) {
+                    areaScores.put(areaId, areaScores.getOrDefault(areaId, 0) + 1);
+                    totalInterested++;
+                } else {
+                    totalNotInterested++;
+                }
             }
         }
 
-        Long recommendedAreaId = null;
-        int maxScore = 0;
-
-        for (Map.Entry<Long, Integer> entry : areaScores.entrySet()) {
-            if (entry.getValue() > maxScore) {
-                maxScore = entry.getValue();
-                recommendedAreaId = entry.getKey();
-            }
+        // Casos de error
+        if (totalInterested == test.getQuestions().size() ||
+                totalNotInterested == test.getQuestions().size() ||
+                totalInterested == 1 || totalNotInterested == 1) {
+            return Map.of("error", "No se pudo determinar tu resultado debido a respuestas insuficientes o poco específicas.");
         }
 
-        if (recommendedAreaId != null) {
-            Area areaObj = areaRepository.findById(recommendedAreaId).orElse(null);
-            if (areaObj != null) {
-                List<Career> carreras = new ArrayList<>(areaObj.getCareers()); // Obtener las carreras del área
+        // Determinar el área con mayor puntaje
+        Long recommendedAreaId = areaScores.entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
 
-
-                careers.addAll(carreras);
-
-
-                User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-                TestResult testResult = new TestResult();
-                testResult.setUser(user);
-                testResult.setRecommendedArea(areaObj);
-                testResult.setRecommendedCareers(carreras); // Aquí clonar la lista
-                testResult.setDateRealization(LocalDateTime.now());
-
-                testResultRepository.save(testResult);
-            }
+        if (recommendedAreaId == null || areaScores.get(recommendedAreaId) <= 1) {
+            return Map.of("error", "No se pudo determinar tu resultado debido a puntajes bajos.");
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("area", areaRepository.findById(recommendedAreaId).orElse(null).getName());
-        response.put("careers", careers.stream().map(Career::getName).collect(Collectors.toList())); // Asegúrate de que 'careers' no esté vacía
+        // Recuperar datos de la base
+        Area area = areaRepository.findById(recommendedAreaId)
+                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
+        List<Career> careers = new ArrayList<>(area.getCareers());
 
-        return response;
+        // Guardar los resultados
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        TestResult testResult = new TestResult();
+        testResult.setUser(user);
+        testResult.setRecommendedArea(area);
+        testResult.setRecommendedCareers(careers);
+        testResult.setDateRealization(LocalDateTime.now());
+        testResultRepository.save(testResult);
+
+        // Respuesta final
+        return Map.of(
+                "area", area.getName(),
+                "careers", careers.stream().map(Career::getName).collect(Collectors.toList())
+        );
     }
+
+
+
+
 }

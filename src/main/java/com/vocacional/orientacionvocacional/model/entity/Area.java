@@ -16,7 +16,7 @@ public class Area {
 
     private String name;
 
-    @OneToMany(mappedBy = "area", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "area", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Career> careers = new ArrayList<>();
 }

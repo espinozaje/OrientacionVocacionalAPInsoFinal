@@ -175,7 +175,8 @@ public class UserService {
                 "<a href=\"" + resetLink + "\">Restablecer contraseña</a>" +
                 "<p>Si no solicitaste este cambio, puedes ignorar este correo.</p>" +
                 "<p>¡Gracias por formar parte de nuestra comunidad!</p>" +
-                "<p>Atentamente,<br>El equipo de desarrollo de Orientacion Vocacional</p>", true);
+                "<p>Atentamente,<br>El equipo de desarrollo de Orientacion Vocacional</p>"+
+                "<p>Tener en cuenta que el link caduce dentro de 2 horas</p>", true);
 
         mailSender.send(message);
     }

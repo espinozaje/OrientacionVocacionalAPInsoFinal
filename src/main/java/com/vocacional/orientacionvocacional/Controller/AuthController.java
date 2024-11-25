@@ -57,8 +57,7 @@ public class AuthController {
 
     @Autowired
     private HttpServletRequest request;
-    @Autowired
-    private EmailService emailService;
+
 
 
     @PostMapping("/register")
@@ -166,19 +165,12 @@ public class AuthController {
 
         Student student = optionalStudent.get();
 
-        // Verificar si el correo electrónico ha cambiado
-        if (!student.getEmail().equals(updatedStudent.getEmail())) {
-            String newVerificationCode = studentService.generateVerificationCode();
-            student.setVerificationCode(newVerificationCode);
-            student.setEmail(updatedStudent.getEmail());
-            student.setVerified(false); // Desmarcar como verificado
 
-            // Enviar correo de verificación
-            emailService.sendVerificationEmail(student.getEmail(), newVerificationCode);
-
-            studentRepository.save(student);
-            return ResponseEntity.ok(Map.of("message", "Se ha enviado un nuevo código de verificación. Verifica tu correo para completar la actualización."));
+        Optional<Student> existingStudent = studentRepository.findByFirstNameAndLastName(updatedStudent.getFirstName(), updatedStudent.getLastName());
+        if (existingStudent.isPresent() && !existingStudent.get().getId().equals(student.getId())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Ya existe un estudiante con el mismo nombre y apellido"));
         }
+
 
         // Si no hay cambios en el correo, se puede actualizar el perfil
         student.setFirstName(updatedStudent.getFirstName());
@@ -188,6 +180,8 @@ public class AuthController {
         studentRepository.save(student);
         return ResponseEntity.ok(Map.of("message", "Perfil actualizado exitosamente."));
     }
+
+
     @PutMapping("/update-image")
     public ResponseEntity<FileResponseDTO> updateProfileImage(@RequestParam("file") MultipartFile file,
                                                               @RequestHeader("Authorization") String token) {

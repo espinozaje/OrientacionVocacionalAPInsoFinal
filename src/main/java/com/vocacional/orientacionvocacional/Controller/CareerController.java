@@ -44,7 +44,7 @@ public class CareerController {
 
             List<Career> careers = careerRepository.findByAreaId(areaId);
             List<CareerDTO> careerDTOs = careers.stream()
-                    .map(career -> new CareerDTO(career.getId(), career.getName(), career.getImg(), career.getDescription(), career.getPriceMonthly(), career.getLocation(), career.getArea().getName()))
+                    .map(career -> new CareerDTO(career.getId(), career.getName(),career.getDescription(),   career.getPriceMonthly(), career.getImg(),career.getLocation(), career.getArea().getName()))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(careerDTOs);

@@ -3,9 +3,7 @@ server.servlet.context-path=/api/v1
 
 
 spring.datasource.url=jdbc:postgresql://autorack.proxy.rlwy.net:26827/railway
-
 spring.datasource.username=postgres
-
 spring.datasource.password=fBJMvTQRyxGuWsqGcCCtASNyiyBpmYKV
 spring.datasource.driver-class-name=org.postgresql.Driver
 
