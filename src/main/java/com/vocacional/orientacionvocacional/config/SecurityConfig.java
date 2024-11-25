@@ -42,7 +42,8 @@ public class SecurityConfig {
                                 "/api/v1/adviser/getAdviser/**",
                                 "/adviser/listAdvisors",
                                 "/api/v1/checkout/**",
-                                "/api/v1/availability/**"
+                                "/api/v1/availability/**",
+                                "/api/v1/students/{id}/cancel-plan"
                         ).hasAnyAuthority(ERole.STUDENT.name(), ERole.ADVISER.name(), ERole.ADMIN.name())
                         .requestMatchers("/adviser/**").hasAnyAuthority(ERole.ADVISER.name(), ERole.STUDENT.name(), ERole.ADMIN.name())
                         .anyRequest().permitAll()
