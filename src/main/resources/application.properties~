@@ -2,11 +2,9 @@ spring.application.name=vocation-api
 server.servlet.context-path=/api/v1
 
 
-#spring.datasource.url=jdbc:postgresql://autorack.proxy.rlwy.net:26827/railway
-spring.datasource.url=jdbc:postgresql://localhost:5432/vocacional_db
+spring.datasource.url=jdbc:postgresql://autorack.proxy.rlwy.net:26827/railway
 spring.datasource.username=postgres
-#spring.datasource.password=fBJMvTQRyxGuWsqGcCCtASNyiyBpmYKV
-spring.datasource.password=admin
+spring.datasource.password=fBJMvTQRyxGuWsqGcCCtASNyiyBpmYKV
 spring.datasource.driver-class-name=org.postgresql.Driver
 
 
@@ -18,7 +16,7 @@ spring.jpa.show-sql=true
 
 spring.jpa.properties.hibernate.format_sql=true
 
-spring.sql.init.mode=never
+spring.sql.init.mode=always
 
 spring.sql.init.data-locations=classpath:data-test.sql
 

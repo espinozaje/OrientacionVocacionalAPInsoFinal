@@ -113,10 +113,4 @@ public class StudentController {
         List<StudentDTO> students = studentService.listVerifiedStudents();
         return ResponseEntity.ok(students);
     }
-
-    @PutMapping("/{id}/cancel-plan")
-    public ResponseEntity<StudentDTO> cancelPlan(@PathVariable Long id) {
-        StudentDTO updatedStudent = studentService.cancelPlan(id);
-        return ResponseEntity.ok(updatedStudent);
-    }
 }

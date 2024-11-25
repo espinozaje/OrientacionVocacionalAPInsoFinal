@@ -94,4 +94,16 @@ public class StudentService {
 
         return randomId;
     }
+
+    public StudentDTO cancelPlan(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Estudiante con ID " + studentId + " no encontrado"));
+
+        student.setPlan(Plan.FREE);
+
+        student = studentRepository.save(student);
+
+        return studentMapper.toDTO(student);
+    }
+
 }
