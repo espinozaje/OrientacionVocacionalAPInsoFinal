@@ -72,11 +72,7 @@ public class EmailService {
         }
     }
 
-    public void sendEmailNotification(String receiverEmail, String message) {
-        String subject = "Nuevo mensaje recibido";
-        String body = "Has recibido un nuevo mensaje: " + message;
-        sendHtmlEmail(receiverEmail, subject, body);
-    }
+
 
 
     public String generateHtmlBodycreateAdvisory(Student student, Advisory advisory, Adviser adviser) {

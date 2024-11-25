@@ -15,7 +15,7 @@ public class ChatSocketRepository implements IChatSocketRepository{
 
     @Override
     public int save(Chat chatMessageModel) {
-        String SQL = "INSERT INTO chats(user_name, message, room_id, timestamp) VALUES(?,?,?,?)";
+        String SQL = "INSERT INTO chats(user_name, message, room_id, ) VALUES(?,?,?,?)";
         return jdbcTemplate.update(SQL, new Object[]{
             chatMessageModel.getUser_name(),
             chatMessageModel.getMessage(),
