@@ -58,10 +58,7 @@ public class AdviserService {
 
     public AdviserDTO registerAdvisor(AdviserDTO adviserDTO) {
         Integer randomId= generateUniqueRandomId();
-        adviserRepository.findByFirstNameAndLastName(adviserDTO.getFirstName(), adviserDTO.getLastName())
-                .ifPresent(existingAdviser -> {
-                    throw new BadRequestException("El asesor ya existe con el mismo nombre y apellido");
-                });
+
         Adviser asesor = adviserMapper.toEntity(adviserDTO);
         ERole eRole = ERole.ADVISER;
         asesor.setId(randomId);
@@ -70,7 +67,7 @@ public class AdviserService {
         asesor.setLastName(adviserDTO.getLastName());
         asesor.setEmail(adviserDTO.getEmail());
         asesor.setSpecialty(adviserDTO.getSpecialty());
-        asesor.setPassword(passwordEncoder.encode(adviserDTO.getPassword())); // Asegúrate de que estés utilizando un codificador de contraseñas
+        asesor.setPassword(passwordEncoder.encode(adviserDTO.getPassword()));
         asesor.setRole(eRole);
         asesor = userRepository.save(asesor);
         return adviserMapper.toDTO(asesor);

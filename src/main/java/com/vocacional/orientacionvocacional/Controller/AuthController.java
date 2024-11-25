@@ -1,9 +1,11 @@
 package com.vocacional.orientacionvocacional.Controller;
 
 import com.vocacional.orientacionvocacional.dto.*;
+import com.vocacional.orientacionvocacional.model.entity.Admin;
 import com.vocacional.orientacionvocacional.model.entity.Adviser;
 import com.vocacional.orientacionvocacional.model.entity.Student;
 import com.vocacional.orientacionvocacional.model.entity.User;
+import com.vocacional.orientacionvocacional.repository.AdminRepository;
 import com.vocacional.orientacionvocacional.repository.AdviserRepository;
 import com.vocacional.orientacionvocacional.repository.StudentRepository;
 import com.vocacional.orientacionvocacional.service.impl.*;
@@ -57,7 +59,10 @@ public class AuthController {
 
     @Autowired
     private HttpServletRequest request;
-
+    @Autowired
+    private AdminRepository adminRepository;
+    @Autowired
+    private AdminService adminService;
 
 
     @PostMapping("/register")
@@ -83,6 +88,12 @@ public class AuthController {
     public void registerAdvisor(@Validated @RequestBody AdviserDTO adviserDTO) {
             adviserService.registerAdvisor(adviserDTO);
           ResponseEntity.ok().body("{\"message\": \"Usuario registrado con éxito.\"}");
+    }
+
+    @PostMapping("/registerAdmin")
+    public void registerAdmin(@Validated @RequestBody AdminDTO adminDTO) {
+        adminService.registerAdvisor(adminDTO);
+        ResponseEntity.ok().body("{\"message\": \"Usuario registrado con éxito.\"}");
     }
 
     @PostMapping("/login")
@@ -118,14 +129,35 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Aquí cambias la lógica para enviar siempre el token, incluso si el cambio de contraseña es necesario
+
             String token = jwtUtilService.generateToken(advisor);
 
             response.put("message", "Inicio de sesión exitoso");
             response.put("token", token);
 
-            // Agregamos "requiresPasswordChange" para indicarlo al frontend
+
             response.put("requiresPasswordChange", advisor.isNeedsPasswordChange());
+
+            return ResponseEntity.ok(response);
+        }
+
+        Optional<Admin> optionalAdmin = adminRepository.findByEmail(email);
+        if (optionalAdmin.isPresent()) {
+            Admin admin = optionalAdmin.get();
+
+            if (!passwordEncoder.matches(password, admin.getPassword())) {
+                response.put("message", "Contraseña incorrecta");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+
+            String token = jwtUtilService.generateToken(admin);
+
+            response.put("message", "Inicio de sesión exitoso");
+            response.put("token", token);
+
+
+            response.put("requiresPasswordChange", admin.isNeedsPasswordChange());
 
             return ResponseEntity.ok(response);
         }
@@ -142,16 +174,37 @@ public class AuthController {
         if (optionalAdvisor.isPresent()) {
             Adviser advisor = optionalAdvisor.get();
 
-            // Actualiza la contraseña
+
             advisor.setPassword(passwordEncoder.encode(newPassword));
-            advisor.setNeedsPasswordChange(false);  // El asesor ya no necesita cambiar la contraseña
-            adviserRepository.save(advisor);  // Guarda el asesor actualizado
+            advisor.setNeedsPasswordChange(false);
+            adviserRepository.save(advisor);
 
             response.put("message", "Contraseña cambiada exitosamente");
             return ResponseEntity.ok(response);
         }
 
         response.put("message", "Asesor no encontrado");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @PostMapping("/change-password-admin")
+    public ResponseEntity<Map<String, Object>> changePasswordAdmin(@RequestParam String email, @RequestParam String newPassword) {
+        Map<String, Object> response = new HashMap<>();
+
+        Optional<Admin> optionalAdmin = adminRepository.findByEmail(email);
+        if (optionalAdmin.isPresent()) {
+            Admin admin = optionalAdmin.get();
+
+            // Actualiza la contraseña
+            admin.setPassword(passwordEncoder.encode(newPassword));
+            admin.setNeedsPasswordChange(false);
+            adminRepository.save(admin);
+
+            response.put("message", "Contraseña cambiada exitosamente");
+            return ResponseEntity.ok(response);
+        }
+
+        response.put("message", "Admin no encontrado");
         return ResponseEntity.badRequest().body(response);
     }
 

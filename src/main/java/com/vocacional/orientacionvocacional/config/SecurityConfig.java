@@ -43,8 +43,8 @@ public class SecurityConfig {
                                 "/adviser/listAdvisors",
                                 "/api/v1/checkout/**",
                                 "/api/v1/availability/**"
-                        ).hasAnyAuthority(ERole.STUDENT.name(), ERole.ADVISER.name())
-                        .requestMatchers("/adviser/**").hasAnyAuthority(ERole.ADVISER.name(), ERole.STUDENT.name())
+                        ).hasAnyAuthority(ERole.STUDENT.name(), ERole.ADVISER.name(), ERole.ADMIN.name())
+                        .requestMatchers("/adviser/**").hasAnyAuthority(ERole.ADVISER.name(), ERole.STUDENT.name(), ERole.ADMIN.name())
                         .anyRequest().permitAll()
                 )
                 .sessionManagement(session -> session
@@ -59,7 +59,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-       configuration.addAllowedOrigin("https://orientacion-vocacional.vercel.app"); // Origen permitido
+      configuration.addAllowedOrigin("https://orientacion-vocacional.vercel.app"); // Origen permitido
         configuration.addAllowedMethod("*");  // Permite todos los métodos (GET, POST, DELETE, etc.)
         configuration.addAllowedHeader("*");  // Permite todos los encabezados
         configuration.setAllowCredentials(true);  // Permite credenciales como cookies y encabezados de autenticación
